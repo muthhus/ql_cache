@@ -23,7 +23,8 @@ window.ql_cache = function (key, value, persist, expires){
 
     if( $.isArray(data) ) {
       // Don't hold on to more than 5 objects in a key
-      if( data.length > ( typeof persist ==  "number" ) ? persist: 4 ) data.shift();
+      persist = ( typeof persist ==  "number" ) ? persist: 4;
+      if( data.length > persist ) data.shift();
 
       data.push(value);
     } else {
