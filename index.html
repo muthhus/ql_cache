@@ -53,7 +53,7 @@
 
         <label for="expires">Save an expires key?</label>
         <input type="checkbox" name="expires" id="expires" />
-        <p>One of the best use cases for localStorage is saving JSON from AJAX responses. To help with knowing when you need to refresh data, ql_cache gives you the ability to store an "expires" timestamp when you save a value into storage. Given the key/value nature of localStorage</p>
+        <p>One of the best use cases for localStorage is saving JSON from AJAX responses. To help with knowing when you need to refresh data, ql_cache gives you the ability to store an "expires" timestamp when you save a value into storage. Given the key/value nature of localStorage, it's easier to store the expires timestamp in a separate key, following the pattern of "key name" + "expires".</p>
 
         <button id="cache-it">Cache it</button>
         <button disabled="disabled" id="get-it">Now get it back</button>
