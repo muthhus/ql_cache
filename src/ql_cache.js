@@ -1,9 +1,9 @@
 /*
-* Authors: Sam Breed & Taylor Beseda for Quick Left, 2011
+* Authors: Sam Breed & Taylor Beseda
 */
 
 (function($){
-
+// Accepts a key, a value, and flags for persistence and expires timestamps
 window.ql_cache = function (key, value, persist, expires){
   if( typeof key == "undefined" ) return false;
 
@@ -17,12 +17,23 @@ window.ql_cache = function (key, value, persist, expires){
     return ( is_json.test(cache_value) ) ? JSON.parse(cache_value): cache_value;
   }
 
+  // Stick new value into an array with old value(s)
   if( cache_value && persist ) {
-    // Stick new value into an array with old value(s)
-    data = is_json.test(cache_value) ? JSON.parse( cache_value ): cache_value;
 
+    // the best bet is to attempt to parse the old data, because
+    // the is_json regex is ineffective at type persistance. this
+    // solution lets us store and retrieve numbers (for timestamps) reliably
+    try {
+      data = JSON.parse( cache_value );
+    } catch(parse_error) {
+      data = cache_value;
+    }
+
+    // if its already been persisted, we don't need to wrap it in []
     if( $.isArray(data) ) {
-      // Don't hold on to more than 5 objects in a key
+
+      // Don't hold on to more than X objects in a given key,
+      // only applies when we're _sure_ we have an array
       persist = ( typeof persist ==  "number" ) ? persist: 4;
       if( data.length > persist ) data.shift();
 
@@ -35,12 +46,43 @@ window.ql_cache = function (key, value, persist, expires){
     data = value;
   }
 
-  // Set an optional expires key, useful for knowing when to refresh cache
+  // Stringify any objects on the way in. Use the native setItem() method
+  // instead of the array style syntax, since there are mobile performance 
+  // benefits.
+  //
+  // http://jsperf.com/localstorage-direct-access-vs-native-methods
+  localStorage.setItem( key, ( typeof data == "object" ) ? JSON.stringify(data): data );
+
+  // Set an optional expires key, useful for knowing when to refresh cache.
+  // we set it with ql_cache() to have it honor the persitence rules, and remove
+  // any previously set _expires keys when false
   if( expires ) {
-    localStorage.setItem( key + "_expires", ( typeof expires == "number" ) ? expires: Date.now() );
+    ql_cache( key + "_expires", ( typeof expires == "number" ) ? expires: Date.now(), persist );
+  } else {
+    localStorage.removeItem( key + "_expires" );
   }
 
-  localStorage.setItem( key, ( typeof data == "object" ) ? JSON.stringify(data): data );
 };
 
 })(jQuery);
+/*
+Copyright (c) 2011 Quick Left
+
+Permission is hereby granted, free of charge, to any person obtaining a copy
+of this software and associated documentation files (the "Software"), to deal
+in the Software without restriction, including without limitation the rights
+to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
+copies of the Software, and to permit persons to whom the Software is
+furnished to do so, subject to the following conditions:
+
+The above copyright notice and this permission notice shall be included in
+all copies or substantial portions of the Software.
+
+THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
+FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
+AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
+LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
+OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
+THE SOFTWARE.
+*/
