@@ -37,10 +37,10 @@ $(function(){
     $('#results pre')
       .show()
       .empty()
-      .append( typeof value == "object" ? JSON.stringify(value) : value  );
+      .text(key + ": "+ (typeof value == "object" ? JSON.stringify(value) : value));
 
     if( expires )
-     $('#results pre').append(" expires: "+ expires);
+     $('#results pre').append("<br/><br/>expires: "+ ( typeof expires == "object" ? JSON.stringify(expires): expires) );
   });
 });
 

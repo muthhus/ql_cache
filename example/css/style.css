@@ -98,13 +98,13 @@ button {  width: auto; overflow: visible; }
 #container section {position:relative; overflow:hidden; }
 #container .gal_copy { display:none;}
 #container form {float:left;}
-#container form p {float:left;clear:both; padding: 1em;  border: 1px solid #DEDEDE!important;background-color: ghostWhite!important; margin-top:1em; }
+#container #main form p {float:left;clear:both; padding: 1em;  border: 1px solid #DEDEDE!important;background-color: ghostWhite!important; margin-top:1em; }
 #container footer {margin: 20px 0 ;}
 
 #container .extra_slide {width:628px;float:left;padding: 36px; background:#00adf0; height:158px; color:#fff; font-size: 1.5em; }
 #container .extra_slide h1 { border-bottom:none; color:#fff;}
 #container #results { float:left; clear:both;}
-
+#container #main p { float:left; clear:both; width:700px; }
 
 body.error {background: #FF3342; }
 #error {position:fixed; top:20%; padding:2em; width: 20%; left:40%; background:#fff; color:#333; z-index:1000; display:none; border:2px solid #000; font-weight:bold;}
