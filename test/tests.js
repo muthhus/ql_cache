@@ -1,8 +1,3 @@
-
-// documentation on writing tests here: http://docs.jquery.com/QUnit
-// example tests: https://github.com/jquery/qunit/blob/master/test/same.js
-
-// below are some general tests but feel free to delete them.
 $(function(){
 
 module("Basic Requirements");
@@ -78,27 +73,66 @@ module("Persisting values within a key");
     deepEqual( ql_cache("persist"), [ value1, value2, value2 ], "should match the array of expected values" );
   });
 
-
-  test("should only hold on to 5 values for a given key", function(){
+  test("should only hold on to 5 values for a given key, all accepted datatypes", function(){
     localStorage.clear();
 
     expect(3);
 
-    ql_cache("persist", '1');
-    ql_cache("persist", '2', true );
-    ql_cache("persist", '3', true );
-    ql_cache("persist", { "k": "v" }, true );
-    ql_cache("persist", '5', true );
+    // set up a dummy array of values
+    var values = [
+      123456,
+      "An awesome value",
+      [ "a sweet array" ],
+      { "some bitchin": "JSON" },
+      "another key"
+    ];
 
-    deepEqual( ql_cache("persist"), [ "1", "2", "3", { "k": "v" }, "5" ], "should match the array of expected values" );
+    ql_cache("persist", values[0] );
+    ql_cache("persist", values[1], true );
+    ql_cache("persist", values[2], true );
+    ql_cache("persist", values[3], true );
+    ql_cache("persist", values[4], true );
 
-    ql_cache("persist", "6", true);
+    deepEqual( ql_cache("persist"), values, "should match the array of expected values" );
+
+    ql_cache("persist", "Persitence is sweet", true);
 
     equals( ql_cache("persist").length , 5, "should still have a length of 5");
-    deepEqual( ql_cache("persist"), [ "2", "3", { "k": "v" }, "5", "6" ], "should match the array of expected values" );
+
+    // Remove the first value and add the newest in
+    values.shift();
+    values.push("Persitence is sweet");
+
+    deepEqual( ql_cache("persist"), values, "should match the array of expected values" );
 
   });
 
+  test("should allow user to pass an array length", function(){
+    localStorage.clear();
+
+    expect(2);
+
+    // set up a dummy array of values
+    var values = [
+      123456,
+      "An awesome value",
+      [ "a sweet array" ]
+    ];
+
+    ql_cache("persist", values[0] );
+    ql_cache("persist", values[1], true );
+    ql_cache("persist", values[2], 2 );
+
+    ql_cache("persist", "Persitence is sweet", 2);
+
+    equals( ql_cache("persist").length, 3, "should still have a length of 3");
+
+    // Remove the first value and add the newest in
+    values.shift();
+    values.push("Persitence is sweet");
+
+    deepEqual( ql_cache("persist"), values, "should match the array of expected values" );
+  });
 
   test("should clear a value if persist is false", function(){
     localStorage.clear();
@@ -128,9 +162,20 @@ module("Setting an expires key");
 
     ql_cache('gonna_expire', "some value", false, true);
 
-    equals( typeof ql_cache("gonna_expire_expires"), "string", "sets expires key to current time");
+    equals( typeof localStorage.getItem("gonna_expire_expires"), "string", "sets expires key to current time");
     equals( ql_cache("gonna_expire_expires").length, 13, "and it's a time string");
 
+  });
+
+  test("should delete old expires key when false", function(){
+    localStorage.clear();
+
+    expect(1);
+
+    ql_cache('gonna_expire', "some value", false, true);
+    ql_cache('gonna_expire', "some value", false, false);
+
+    equals( localStorage.getItem('gonna_expire_expires') , null, "values is null");
   });
 
   test("should update when key is updated", function(){
@@ -147,8 +192,17 @@ module("Setting an expires key");
 
       new_time = ql_cache("gonna_expire_expires");
 
-
     ok( old_time !== new_time, "time string was updated");
+  });
+
+  test("should honor persistence", function(){
+    localStorage.clear();
+
+    ql_cache("honor_persist", "w00t", true, true );
+    ql_cache("honor_persist", "w00t", true, true );
+    ql_cache("honor_persist", { "test": "test" }, true, true );
+
+    equals( ql_cache("honor_persist_expires").length, 3, "should have saved 3 timestamps");
   });
 
   test("should set a future timestamp if expires is passed a number", function(){
