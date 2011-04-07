@@ -2,9 +2,11 @@
 * Authors: Sam Breed & Taylor Beseda
 */
 
-(function($){
+(function ($, window) {
+
 // Accepts a key, a value, and flags for persistence and expires timestamps
-window.ql_cache = function (key, value, persist, expires){
+var ql_cache = function (key, value, persist, expires) {
+
   if( typeof key == "undefined" ) return false;
 
   var data,
@@ -51,20 +53,65 @@ window.ql_cache = function (key, value, persist, expires){
   // benefits.
   //
   // http://jsperf.com/localstorage-direct-access-vs-native-methods
-  localStorage.setItem( key, ( typeof data == "object" ) ? JSON.stringify(data): data );
+  while(true){
+    try {
+      localStorage.setItem( key, ( typeof data == "object" ) ? JSON.stringify(data): data );
+      break;
+    } catch(storage_error){
+      // If we're out of space, delete the oldest keys
+      if ( storage_error.name == "QUOTA_EXCEEDED_ERR" || storage_error.name == "NS_ERROR_DOM_QUOTA_REACHED" )
+        ql_cache.flushCache();
+    }
+  }
 
   // Set an optional expires key, useful for knowing when to refresh cache.
   // we set it with ql_cache() to have it honor the persitence rules, and remove
   // any previously set _expires keys when false
   if( expires ) {
-    ql_cache( key + "_expires", ( typeof expires == "number" ) ? expires: Date.now(), persist );
+    ql_cache( key + "_expires", ( typeof expires == "number" ) ? expires: $.now(), persist );
   } else {
     localStorage.removeItem( key + "_expires" );
   }
 
 };
 
-})(jQuery);
+// Removes half the oldest keys, based off of expires keys
+ql_cache.flushCache = function(){
+  var len = localStorage.length,
+      expires_keys = [],
+      key;
+
+  // Find all expires keys
+  for(var i = 0; i < len; i += 1) {
+    key = localStorage.key(i);
+
+    if( /_expires$/.test(key) )
+      expires_keys.push(key);
+  }
+
+  // Sort the expires keys by date
+  expires_keys.sort(function(a, b) {
+    var date_a = localStorage[a], date_b = localStorage[b];
+
+    if( $.isArray(date_a) ) date_a = date_a[0];
+    if( $.isArray(date_b) ) date_b = date_b[0];
+
+    return date_a < date_b ? -1 : (date_a > date_b ? +1 : 0);
+  });
+
+  // Loop thru half of expires key and remove them
+  for (var j = 0; j < expires_keys.length / 2; j += 1) {
+    var _key = expires_keys[j];
+
+    localStorage.removeItem( _key );
+    localStorage.removeItem( _key.replace(/_expires$/, "") );
+  }
+};
+
+window.ql_cache = ql_cache;
+
+
+})(jQuery, window);
 /*
 Copyright (c) 2011 Quick Left
 

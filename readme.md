@@ -24,19 +24,19 @@ To get your data back just pass the key
 
     ql_cache( "some_key" );
 
-    "some value"
+    -- "some value"
 
-### JSON and Array support
+### Object and Array support
 
 One of the unfortunate handicaps of localStorage is that it only accepts
-strings as values. `ql_cache` is relies ony JSON.parse() and
+strings. `ql_cache` is relies ony JSON.parse() and
 JSON.stringify to encode and decode any JSON values (or Arrays) passed into it.
 
     ql_cache( "my_json", { "my_value": "is awesome" } );
 
     ql_cache( "my_json" )
 
-    { "my_value": "is awesome" }
+    -- { "my_value": "is awesome" }
 
 This also applies to Arrays.
 

@@ -1,5 +1,7 @@
 $(function(){
 
+var ql_cache = window.ql_cache;
+
 module("Basic Requirements");
 
   test("Should be attached to the window",function(){
@@ -33,7 +35,6 @@ module("Object and Array handling");
 
     deepEqual( key, value, "JSON object is stored and retrived as expected");
   });
-
 
   test("should handle Array storage and retrieval", function(){
     localStorage.clear();
@@ -186,13 +187,20 @@ module("Setting an expires key");
 
     ql_cache('gonna_expire', "some value", false, true);
 
-      old_time = ql_cache("gonna_expire_expires");
+    old_time = ql_cache("gonna_expire_expires");
 
-    ql_cache('gonna_expire', "some updated value", false, true);
+    // FF4 needs this to be async to pass
+    stop();
+
+    setTimeout(function(){
+      ql_cache('gonna_expire', "some updated value", false, true);
 
       new_time = ql_cache("gonna_expire_expires");
 
-    ok( old_time !== new_time, "time string was updated");
+      ok( old_time !== new_time, "time string was updated");
+
+      start();
+    }, 1);
   });
 
   test("should honor persistence", function(){
@@ -218,5 +226,41 @@ module("Setting an expires key");
 
   });
 
+module('flushCache');
+
+  test('should remove 1/2 of all keys w/ expires', function(){
+    localStorage.clear();
+
+    // Create 32 keys w/ expires === true
+    // for a total of 64 keys
+    for(var i = 0; i < 32; i += 1){
+      ql_cache('flush'+i, { my: "super rad JSON" }, false, true );
+    }
+
+    ql_cache.flushCache();
+    equals( localStorage.length, 32, "localStorage has less keys");
+
+    ql_cache.flushCache();
+    equals( localStorage.length, 16, "localStorage has even less keys");
+  
+  });
+
+  test('should also work with persisted timestamps', function(){
+    localStorage.clear();
+
+    // Create 32 keys w/ expires === true
+    // for a total of 64 keys
+    for(var i = 0; i < 32; i += 1){
+      ql_cache('flush'+i, { my: "super rad JSON" }, true, true );
+      ql_cache('flush'+i, { my: "super rad persisted JSON" }, true, true );
+    }
+
+    ql_cache.flushCache();
+    equals( localStorage.length, 32, "localStorage has less keys");
+
+    ql_cache.flushCache();
+    equals( localStorage.length, 16, "localStorage has even less keys");
+  
+  });
 
 });
