@@ -7,7 +7,7 @@
 // Accepts a key, a value, and flags for persistence and expires timestamps
 var ql_cache = function (key, value, persist, expires) {
 
-  if( typeof key == "undefined" ) return false;
+  if( typeof key == "undefined" || !ql_cache.canHasStorage() ) return false;
 
   var data,
       is_json = /^\{|\[.+\}|\]$/,
@@ -107,6 +107,18 @@ ql_cache.flushCache = function(){
     localStorage.removeItem( _key.replace(/_expires$/, "") );
   }
 };
+
+
+// Credit to Jeff Bail for pointing out the need for this
+//  http://jeffbail.com/
+ql_cache.canHasStorage = function(){
+  try {
+    return 'localStorage' in window && window['localStorage'] !== null;
+  } catch(not_supported) {
+    return false;
+  }
+};
+
 
 window.ql_cache = ql_cache;
 
