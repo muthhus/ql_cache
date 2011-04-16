@@ -11,7 +11,7 @@ var ql_cache = function (key, value, persist, expires) {
 
   var data,
       is_json = /^\{|\[.+\}|\]$/,
-      cache_value = localStorage.getItem(key);
+      cache_value = localStorage[key];
 
   // Return value if just the key is passed
   if( typeof value == "undefined" ) {
@@ -48,14 +48,12 @@ var ql_cache = function (key, value, persist, expires) {
     data = value;
   }
 
-  // Stringify any objects on the way in. Use the native setItem() method
-  // instead of the array style syntax, since there are mobile performance 
-  // benefits.
+  // Stringify any objects on the way in.
   //
   // http://jsperf.com/localstorage-direct-access-vs-native-methods
   while(true){
     try {
-      localStorage.setItem( key, ( typeof data == "object" ) ? JSON.stringify(data): data );
+      localStorage[key] = ( typeof data == "object" ) ? JSON.stringify(data): data;
       break;
     } catch(storage_error){
       // If we're out of space, delete the oldest keys
@@ -70,7 +68,7 @@ var ql_cache = function (key, value, persist, expires) {
   if( expires ) {
     ql_cache( key + "_expires", ( typeof expires == "number" ) ? expires: $.now(), persist );
   } else {
-    localStorage.removeItem( key + "_expires" );
+    delete localStorage[ key + "_expires" ];
   }
 
 };
@@ -103,8 +101,8 @@ ql_cache.flushCache = function(){
   for (var j = 0; j < expires_keys.length / 2; j += 1) {
     var _key = expires_keys[j];
 
-    localStorage.removeItem( _key );
-    localStorage.removeItem( _key.replace(/_expires$/, "") );
+    delete localStorage[_key];
+    delete localStorage[_key.replace(/_expires$/, "")];
   }
 };
 
