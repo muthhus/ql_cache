@@ -17,9 +17,9 @@ module("Basic Requirements");
   test("should store and retrieve simple strings", function(){
     localStorage.clear();
 
-    ql_cache("key", "value");
+    ql_cache("foo", "value");
 
-    equals( ql_cache("key"), "value", "string storage and retrival");
+    equals( ql_cache("foo"), "value", "string storage and retrival");
   });
 
 module("Object and Array handling");
@@ -29,9 +29,9 @@ module("Object and Array handling");
 
     var key, value = { "food": "hotdogs"};
 
-    ql_cache("key", value);
+    ql_cache("foo", value);
 
-    key = ql_cache("key");
+    key = ql_cache("foo");
 
     deepEqual( key, value, "JSON object is stored and retrived as expected");
   });

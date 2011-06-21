@@ -73,6 +73,11 @@ var ql_cache = function (key, value, persist, expires) {
 
 };
 
+ql_cache.kill = function(key){
+  delete localStorage[key];
+  delete localStorage[key +'_expires'];
+};
+
 // Removes half the oldest keys, based off of expires keys
 ql_cache.flushCache = function(){
   var len = localStorage.length,
